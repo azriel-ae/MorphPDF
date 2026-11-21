@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MorphPDF — Image, PDF &amp; Document Tools</title>
+    <meta name="description" content="Edit images, convert documents, and manage PDFs in one simple workspace. Semua proses berjalan lokal di browser Anda.">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#F7F4ED">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MorphPDF">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Cropper.js CSS & JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <!-- Fabric.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- PDF-Lib for Client-Side PDF Operations -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+    <!-- PDF.js for PDF Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <!-- JSZip for Batch PDF to Image Zip Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- SheetJS (xlsx) for real Excel workbook generation (File to Excel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- App config: Tailwind theme + PDF.js worker setup (needs pdf.js loaded above) -->
+    <script src="assets/config.js"></script>
+
+    <!-- App stylesheet (custom CSS on top of Tailwind) -->
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="font-sans min-h-screen flex flex-col pb-16 lg:pb-0">
+
+    <header class="mp-header no-print sticky top-0 z-50">
+        <div class="max-w-[1160px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-2 sm:gap-6 min-w-0">
+                <a href="#" onclick="switchMainView('home'); return false;" class="flex items-center gap-2.5 shrink-0">
+                    <span class="mp-brand-mark" aria-hidden="true">
+                        <svg width="30" height="30" viewBox="0 0 64 64">
+                            <defs><clipPath id="mp-mark-nav"><path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z"/></clipPath></defs>
+                            <path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z" fill="#302D28"/>
+                            <g clip-path="url(#mp-mark-nav)">
+                                <path d="M11.2 63.84 L60 23.2 L64 27.4 L64 68 L14 68 Z" fill="#E9B978"/>
+                                <path d="M8 60 L56 20" stroke="#F7F4ED" stroke-width="9"/>
+                                <path d="M22.1 51.6 L39.2 37.1" stroke="#302D28" stroke-width="4" stroke-linecap="round" fill="none"/>
+                                <path d="M46.2 30.5 L35.8 33 L38.4 35.4 L35 39.6 Z" fill="#302D28" stroke="#302D28" stroke-width="1.6" stroke-linejoin="round"/>
+                            </g>
+                            <rect x="14.5" y="13.5" width="19" height="3.8" rx="1.9" fill="#F7F4ED" opacity="0.5"/>
+                            <rect x="14.5" y="21.5" width="13" height="3.8" rx="1.9" fill="#F7F4ED" opacity="0.3"/>
+                        </svg>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="mp-brand-word block">MorphPDF</span>
+                        <span class="mp-brand-sub hidden lg:block">Image, PDF &amp; document tools</span>
+                    </span>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden lg:flex items-center gap-1">
+                    <button id="nav-item-home" onclick="switchMainView('home')" class="mp-nav-link">
+                        <i class="fa-solid fa-table-cells-large text-[13px]"></i>
+                        <span>Tools</span>
+                    </button>
+                    <button id="nav-item-photo" onclick="switchMainView('photo')" class="mp-nav-link">
+                        <i class="fa-solid fa-image text-[13px]"></i>
+                        <span>Photo Editor</span>
+                    </button>
+
+                    <!-- Image Tools Dropdown -->
+                    <div class="relative" id="image-tools-dropdown-container">
+                        <button id="image-tools-menu-button" onclick="toggleImageToolsDropdown()" aria-expanded="false" aria-haspopup="true" class="mp-nav-link">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[13px]" style="color:#C98D50"></i>
+                            <span>Image Tools</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" id="image-tools-chevron"></i>
+                        </button>
+
+                        <div id="image-tools-dropdown-menu" class="dropdown-menu hidden-dropdown absolute left-0 mt-2 w-72 rounded-xl p-2 z-50">
+                            <a href="#" onclick="switchMainView('converter'); toggleImageToolsDropdown(); return false;" class="mp-dd-item">
+                                <span class="mp-dd-icon"><i class="fa-solid fa-file-arrow-down"></i></span>
+                                <span>
+                                    <span class="mp-dd-title block">Image Converter</span>
+                                    <span class="mp-dd-sub block">Ubah format gambar &amp; kompresi</span>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Document Tools (File to Excel) -->
+                    <a href="#" onclick="switchMainView('excel')" class="mp-nav-link">
+                        <i class="fa-solid fa-file-excel text-[13px]" style="color:#C98D50"></i>
+                        <span>File ke Excel</span>
+                    </a>
+
+                    <div class="relative" id="pdf-dropdown-container">
+                        <button id="pdf-menu-button" onclick="togglePdfDropdown()" aria-expanded="false" aria-haspopup="true" class="mp-nav-link">
+                            <i class="fa-solid fa-file-pdf text-[13px]" style="color:#C98D50"></i>
+                            <span>PDF Tools</span>
+                            <span class="mp-nav-badge">5</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" id="pdf-chevron"></i>
+                        </button>
+
+                        <div id="pdf-dropdown-menu" class="dropdown-menu hidden-dropdown absolute left-0 mt-2 w-[520px] rounded-xl p-3 z-50">
+                            <div class="flex items-center justify-between pb-3 mb-2" style="border-bottom:1px solid rgba(229,222,210,.8)">
+                                <span class="mp-dd-title">PDF Tools</span>
+                                <span class="text-[11px] font-semibold flex items-center gap-1" style="color:#777168">
+                                    <i class="fa-solid fa-shield-halved"></i> 100% Aman &amp; Lokal
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-1">
+                                <a href="#" onclick="selectPdfTool('image-to-pdf'); togglePdfDropdown(); return false;" class="mp-dd-item">
+                                    <span class="mp-dd-icon"><i class="fa-solid fa-images"></i></span>
+                                    <span>
+                                        <span class="mp-dd-title block">Image to PDF</span>
+                                        <span class="mp-dd-sub block">Ubah JPG/PNG/WEBP ke PDF</span>
+                                    </span>
+                                </a>
+
+                                <a href="#" onclick="selectPdfTool('pdf-to-image'); togglePdfDropdown(); return false;" class="mp-dd-item">
+                                    <span class="mp-dd-icon"><i class="fa-solid fa-file-image"></i></span>
+                                    <span>
+                                        <span class="mp-dd-title block">PDF to Image</span>
+                                        <span class="mp-dd-sub block">Ekstrak halaman PDF ke gambar</span>
+                                    </span>
+                                </a>
+
+                                <a href="#" onclick="selectPdfTool('merge-pdf'); togglePdfDropdown(); return false;" class="mp-dd-item">
+                                    <span class="mp-dd-icon"><i class="fa-solid fa-object-group"></i></span>
+                                    <span>
+                                        <span class="mp-dd-title block">Merge PDF</span>
+                                        <span class="mp-dd-sub block">Gabung beberapa file PDF</span>
+                                    </span>
+                                </a>
+
+                                <a href="#" onclick="selectPdfTool('split-pdf'); togglePdfDropdown(); return false;" class="mp-dd-item">
+                                    <span class="mp-dd-icon"><i class="fa-solid fa-scissors"></i></span>
+                                    <span>
+                                        <span class="mp-dd-title block">Split PDF</span>
+                                        <span class="mp-dd-sub block">Pisah halaman PDF tertentu</span>
+                                    </span>
+                                </a>
+
+                                <a href="#" onclick="selectPdfTool('compress-pdf'); togglePdfDropdown(); return false;" class="mp-dd-item">
+                                    <span class="mp-dd-icon"><i class="fa-solid fa-compress"></i></span>
+                                    <span>
+                                        <span class="mp-dd-title block">Compress PDF</span>
+                                        <span class="mp-dd-sub block">Kecilkan ukuran file PDF</span>
+                                    </span>
+                                </a>
+
+                                <a href="#" onclick="switchMainView('excel'); togglePdfDropdown(); return false;" class="mp-dd-item">
+                                    <span class="mp-dd-icon"><i class="fa-solid fa-file-excel"></i></span>
+                                    <span>
+                                        <span class="mp-dd-title block">PDF to Excel</span>
+                                        <span class="mp-dd-sub block">Ekstrak tabel PDF ke .xlsx</span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                <button id="install-app-btn" class="hidden mp-secondary-btn" style="color:#302D28" title="Pasang MorphPDF sebagai aplikasi">
+                    <i class="fa-solid fa-download" style="color:#C98D50"></i>
+                    <span class="hidden md:inline">Install App</span>
+                </button>
+                <div id="photo-header-actions" class="hidden items-center gap-1.5 sm:gap-2">
+                    <button type="button" onclick="downloadEditedPhoto()" class="pe-btn" title="Unduh foto saat ini" aria-label="Unduh foto">
+                        <i class="fa-solid fa-download" aria-hidden="true"></i>
+                        <span class="hidden sm:inline">Unduh</span>
+                    </button>
+                    <button type="button" id="nav-print-btn" onclick="openPrintDialog()" class="pe-btn pe-btn--primary" aria-label="Cetak foto">
+                        <i class="fa-solid fa-print" aria-hidden="true"></i>
+                        <span class="hidden sm:inline">Cetak</span>
+                    </button>
+                </div>
+
+                <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-lg transition" style="color:#777168" title="Menu Navigasi" aria-label="Buka menu">
+                    <i class="fa-solid fa-bars text-lg" id="mobile-menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden lg:hidden px-4 pt-2 pb-4 space-y-1">
+            <button onclick="switchMainView('home'); toggleMobileMenu();" class="mp-mobile-link">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-table-cells-large" style="color:#C98D50"></i> Tools</span>
+                <i class="fa-solid fa-chevron-right text-[10px]" style="color:#A9A196"></i>
+            </button>
+            <button onclick="switchMainView('photo'); toggleMobileMenu();" class="mp-mobile-link">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-image" style="color:#C98D50"></i> Photo Editor</span>
+                <i class="fa-solid fa-chevron-right text-[10px]" style="color:#A9A196"></i>
+            </button>
+            <button onclick="switchMainView('converter'); toggleMobileMenu();" class="mp-mobile-link">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-arrow-down" style="color:#C98D50"></i> Image Converter</span>
+                <i class="fa-solid fa-chevron-right text-[10px]" style="color:#A9A196"></i>
+            </button>
+            <button onclick="switchMainView('excel'); toggleMobileMenu();" class="mp-mobile-link">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-excel" style="color:#C98D50"></i> File ke Excel</span>
+                <i class="fa-solid fa-chevron-right text-[10px]" style="color:#A9A196"></i>
+            </button>
+
+            <button id="install-app-mobile" class="hidden mp-mobile-link">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-download" style="color:#C98D50"></i> Install App</span>
+                <i class="fa-solid fa-chevron-right text-[10px]" style="color:#A9A196"></i>
+            </button>
+
+            <div class="rounded-xl overflow-hidden mt-2" style="border:1px solid #E5DED2">
+                <button onclick="toggleMobilePdfAccordion()" class="w-full text-left p-3 font-semibold text-xs flex items-center justify-between" style="background:#F0EBE1;color:#302D28">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-file-pdf" style="color:#C98D50"></i> PDF Tools
+                    </span>
+                    <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" id="mobile-pdf-chevron"></i>
+                </button>
+                <div id="mobile-pdf-accordion-content" class="hidden p-2 space-y-1" style="background:#FFFFFF">
+                    <button onclick="selectPdfTool('image-to-pdf'); toggleMobileMenu();" class="mp-mobile-link text-xs">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-images w-4" style="color:#C98D50"></i> Image to PDF</span>
+                    </button>
+                    <button onclick="selectPdfTool('pdf-to-image'); toggleMobileMenu();" class="mp-mobile-link text-xs">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-file-image w-4" style="color:#C98D50"></i> PDF to Image</span>
+                    </button>
+                    <button onclick="selectPdfTool('merge-pdf'); toggleMobileMenu();" class="mp-mobile-link text-xs">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-object-group w-4" style="color:#C98D50"></i> Merge PDF</span>
+                    </button>
+                    <button onclick="selectPdfTool('split-pdf'); toggleMobileMenu();" class="mp-mobile-link text-xs">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-scissors w-4" style="color:#C98D50"></i> Split PDF</span>
+                    </button>
+                    <button onclick="selectPdfTool('compress-pdf'); toggleMobileMenu();" class="mp-mobile-link text-xs">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-compress w-4" style="color:#C98D50"></i> Compress PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hidden File Inputs -->
+    <input type="file" id="image-file-input" accept="image/jpeg,image/jpg,image/png,image/webp,image/avif" class="hidden" onchange="handleFileSelect(event)">
+    <input type="file" id="converter-file-input" accept="image/jpeg,image/jpg,image/png,image/webp,image/avif" multiple class="hidden" onchange="handleConverterFiles(event)">
+
+    <main class="flex-1 w-full max-w-[1160px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+        <!-- VIEW 0: HOME -->
+        <div id="main-view-home">
+
+            <!-- Hero -->
+            <section class="mp-hero pt-6 sm:pt-10">
+                <div class="mp-hero__grid">
+
+                    <!-- Left: copy -->
+                    <div class="mp-hero__copy">
+                        <span class="mp-eyebrow">MorphPDF &middot; Local file workspace</span>
+                        <h1 class="mt-4">
+                            Everything you need<br class="hidden sm:block"> to work with files.
+                        </h1>
+                        <p class="mp-hero-sub mt-4">
+                            Edit images, convert documents, and manage PDFs in one simple workspace.
+                            Semua proses berjalan lokal di browser Anda — tidak ada file yang diunggah ke server.
+                        </p>
+
+                        <!-- Search tools -->
+                        <div class="mp-search mt-6">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <input type="search" id="tool-search" placeholder="Cari tools: merge, compress, convert&hellip;" aria-label="Cari tools">
+                            <button type="button" id="tool-search-clear" class="mp-search-clear" aria-label="Bersihkan pencarian">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Quick access -->
+                        <div class="mp-quick-row mt-4">
+                            <span class="mp-quick-label">Sering dipakai:</span>
+                            <button type="button" class="mp-quick-chip" onclick="selectPdfTool('merge-pdf')"><i class="fa-solid fa-object-group"></i> Merge PDF</button>
+                            <button type="button" class="mp-quick-chip" onclick="selectPdfTool('compress-pdf')"><i class="fa-solid fa-compress"></i> Compress PDF</button>
+                            <button type="button" class="mp-quick-chip" onclick="selectPdfTool('image-to-pdf')"><i class="fa-solid fa-images"></i> Image to PDF</button>
+                            <button type="button" class="mp-quick-chip" onclick="switchMainView('photo')"><i class="fa-solid fa-image"></i> Photo Editor</button>
+                        </div>
+
+                        <p class="mp-hero-meta mt-6">
+                            <span><i class="fa-solid fa-layer-group" aria-hidden="true"></i>&nbsp; 8 tools</span>
+                            <span aria-hidden="true">&middot;</span>
+                            <span>100% client-side</span>
+                            <span aria-hidden="true">&middot;</span>
+                            <span>tanpa akun</span>
+                            <span aria-hidden="true">&middot;</span>
+                            <span>tanpa upload</span>
+                        </p>
+                    </div>
+
+                    <!-- Right: workspace visual (decorative, aria-hidden) -->
+                    <div class="mp-hero__visual" aria-hidden="true">
+                        <div class="hv-stage">
+
+                            <!-- Floating conversion chip -->
+                            <div class="hv-chip hv-chip--convert">
+                                <i class="fa-solid fa-right-left"></i>
+                                JPG <i class="fa-solid fa-arrow-right-long" style="color:#A9A196"></i> PDF
+                            </div>
+
+                            <!-- Document preview card -->
+                            <div class="hv-doc">
+                                <div class="hv-doc__bar">
+                                    <span class="hv-dot"></span><span class="hv-dot"></span><span class="hv-dot"></span>
+                                    <span class="hv-doc__name">laporan-q3.pdf</span>
+                                    <span class="hv-doc__tag">PDF</span>
+                                </div>
+                                <div class="hv-doc__body">
+                                    <span class="hv-line hv-line--title"></span>
+                                    <span class="hv-line hv-line--w80"></span>
+                                    <span class="hv-line hv-line--w65"></span>
+                                    <div class="hv-img-block"><i class="fa-regular fa-image"></i></div>
+                                    <span class="hv-line hv-line--w80"></span>
+                                    <span class="hv-line hv-line--short"></span>
+                                </div>
+                                <div class="hv-progress">
+                                    <span class="hv-progress__label">Mengompres&hellip;</span>
+                                    <span class="hv-progress__track"><span class="hv-progress__fill"></span></span>
+                                    <span class="hv-progress__label">68%</span>
+                                </div>
+                            </div>
+
+                            <!-- Floating image file card -->
+                            <div class="hv-thumb">
+                                <span class="hv-thumb__img"></span>
+                                <span class="hv-thumb__meta">
+                                    <b>foto-produk.png</b>
+                                    <span>1.2 MB &middot; siap dikonversi</span>
+                                </span>
+                            </div>
+
+                            <!-- Floating status chip -->
+                            <div class="hv-chip hv-chip--done">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Selesai &middot; &minus;68%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recently used -->
+            <section id="recent-tools" class="hidden mt-12 sm:mt-14">
+                <div class="mp-section-rule">
+                    <h2 class="mp-section-title">Baru saja digunakan</h2>
+                </div>
+                <div id="recent-tools-list" class="flex flex-wrap gap-2.5"></div>
+            </section>
+
+            <!-- Tools directory -->
+            <section class="mt-12 sm:mt-14">
+
+                <!-- Image Tools -->
+                <div class="mp-cat" data-tool-group>
+                    <span class="mp-cat__icon"><i class="fa-solid fa-image"></i></span>
+                    <div class="mp-cat__body">
+                        <h2 class="mp-cat__title">Image Tools</h2>
+                        <p class="mp-cat__desc">Editor &amp; konversi format gambar</p>
+                    </div>
+                    <span class="mp-cat__count">2 tools</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 tool-grid--image">
+                    <a href="#" onclick="switchMainView('photo'); return false;" class="tool-card" data-search="photo editor gambar edit crop filter teks resize">
+                        <span class="tool-card__icon"><i class="fa-solid fa-image"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">Photo Editor</span>
+                            <span class="tool-card__desc block">Edit, crop, filter and export images.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                    <a href="#" onclick="switchMainView('converter'); return false;" class="tool-card" data-search="image converter konversi format png jpg webp avif kompresi">
+                        <span class="tool-card__icon"><i class="fa-solid fa-file-arrow-down"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">Image Converter</span>
+                            <span class="tool-card__desc block">Convert images between supported formats.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                </div>
+
+                <!-- PDF Tools -->
+                <div class="mp-cat mt-9 sm:mt-10" data-tool-group>
+                    <span class="mp-cat__icon mp-cat__icon--pdf"><i class="fa-solid fa-file-pdf"></i></span>
+                    <div class="mp-cat__body">
+                        <h2 class="mp-cat__title">PDF Tools</h2>
+                        <p class="mp-cat__desc">Gabung, pisah, kompres, dan konversi PDF</p>
+                    </div>
+                    <span class="mp-cat__count">5 tools</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 tool-grid--pdf">
+                    <a href="#" onclick="selectPdfTool('image-to-pdf'); return false;" class="tool-card" data-search="image to pdf gambar jadi pdf jpg png webp buat dokumen">
+                        <span class="tool-card__icon"><i class="fa-solid fa-images"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">Image to PDF</span>
+                            <span class="tool-card__desc block">Create PDF documents from images.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                    <a href="#" onclick="selectPdfTool('pdf-to-image'); return false;" class="tool-card" data-search="pdf to image ekstrak halaman png jpg gambar render">
+                        <span class="tool-card__icon"><i class="fa-solid fa-file-image"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">PDF to Image</span>
+                            <span class="tool-card__desc block">Extract every page as an image.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                    <a href="#" onclick="selectPdfTool('merge-pdf'); return false;" class="tool-card" data-search="merge pdf gabung satukan combine beberapa file">
+                        <span class="tool-card__icon"><i class="fa-solid fa-object-group"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">Merge PDF</span>
+                            <span class="tool-card__desc block">Combine several PDF files into one.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                    <a href="#" onclick="selectPdfTool('split-pdf'); return false;" class="tool-card" data-search="split pdf pisah pisahkan halaman range extract">
+                        <span class="tool-card__icon"><i class="fa-solid fa-scissors"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">Split PDF</span>
+                            <span class="tool-card__desc block">Pull specific pages out of a PDF.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                    <a href="#" onclick="selectPdfTool('compress-pdf'); return false;" class="tool-card" data-search="compress pdf kompres kecilkan ukuran optimize">
+                        <span class="tool-card__icon"><i class="fa-solid fa-compress"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">Compress PDF</span>
+                            <span class="tool-card__desc block">Reduce a PDF's file size.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                </div>
+
+                <!-- Document Tools -->
+                <div class="mp-cat mt-9 sm:mt-10" data-tool-group>
+                    <span class="mp-cat__icon mp-cat__icon--doc"><i class="fa-solid fa-file-excel"></i></span>
+                    <div class="mp-cat__body">
+                        <h2 class="mp-cat__title">Document Tools</h2>
+                        <p class="mp-cat__desc">Konversi file ke spreadsheet</p>
+                    </div>
+                    <span class="mp-cat__count">1 tool</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 tool-grid--doc">
+                    <a href="#" onclick="switchMainView('excel'); return false;" class="tool-card" data-search="file to excel csv json txt xlsx spreadsheet konversi tabel">
+                        <span class="tool-card__icon"><i class="fa-solid fa-file-excel"></i></span>
+                        <span class="min-w-0 pr-5">
+                            <span class="tool-card__title block">File to Excel</span>
+                            <span class="tool-card__desc block">Convert CSV, JSON, TXT or PDF into .xlsx.</span>
+                        </span>
+                        <i class="fa-solid fa-arrow-right tool-card__arrow"></i>
+                    </a>
+                </div>
+
+                <!-- Search empty state -->
+                <div id="tool-search-empty" class="hidden mp-empty-note mt-6">
+                    <i class="fa-solid fa-magnifying-glass mr-2" style="color:#C98D50"></i>
+                    Tidak ada tools yang cocok dengan pencarian Anda. Coba kata kunci lain — misalnya "merge", "compress", atau "convert".
+                </div>
+            </section>
+
+            <!-- Why MorphPDF -->
+            <section class="mt-12 sm:mt-14">
+                <div class="mp-section-head">
+                    <h2>Mengapa MorphPDF</h2>
+                    <p>Perangkat kerja yang tenang dan bisa diandalkan.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="mp-feature mp-feature--cream">
+                        <span class="mp-feature__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                        <h3>Privat secara default</h3>
+                        <p>Semua pemrosesan berjalan sepenuhnya di browser Anda. File tidak pernah diunggah ke server mana pun.</p>
+                    </div>
+                    <div class="mp-feature mp-feature--peach">
+                        <span class="mp-feature__icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
+                        <h3>Cepat dan langsung</h3>
+                        <p>Tidak ada antrean unggah atau unduh. Karena semuanya lokal, hasilnya siap secepat perangkat Anda bekerja.</p>
+                    </div>
+                    <div class="mp-feature">
+                        <span class="mp-feature__icon"><i class="fa-solid fa-square-check" aria-hidden="true"></i></span>
+                        <h3>Satu ruang kerja yang konsisten</h3>
+                        <p>Alur yang sama di setiap tools: unggah, atur, pratinjau, lalu unduh. Tidak perlu belajar ulang di setiap fitur.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Privacy -->
+            <section class="mt-12 sm:mt-14">
+                <div class="mp-privacy">
+                    <span class="mp-privacy__icon"><i class="fa-solid fa-lock" aria-hidden="true"></i></span>
+                    <div>
+                        <h3>Dokumen Anda tetap di perangkat Anda</h3>
+                        <p>MorphPDF tidak memiliki server pemrosesan file. Dokumen, foto, dan data yang Anda buka di sini tetap berada di perangkat Anda dari awal sampai akhir. Tidak ada pencatatan file, tidak ada penyimpanan sementara di pihak ketiga, dan tidak ada akun yang diperlukan.</p>
+                        <ul class="mp-privacy__points">
+                            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Tanpa unggah ke server</li>
+                            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Tanpa penyimpanan sementara</li>
+                            <li><i class="fa-solid fa-check" aria-hidden="true"></i> Tanpa akun</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- VIEW 1: PHOTO EDITOR WORKSPACE -->
+        <div id="main-view-photo" class="hidden">
+          <div class="pe-layout">
+            <section class="pe-main" aria-label="Area kerja foto">
+                <div class="pe-toolbar no-print" role="toolbar" aria-label="Toolbar Photo Editor">
+                    <div class="pe-seg" role="group" aria-label="Tampilan">
+                        <button id="view-btn-editor" type="button" onclick="switchView('editor')" class="pe-seg__btn" aria-pressed="true"><i class="fa-solid fa-crop-simple" aria-hidden="true"></i><span>Editor</span></button>
+                        <button id="view-btn-print" type="button" onclick="switchView('print')" class="pe-seg__btn" aria-pressed="false"><i class="fa-regular fa-file" aria-hidden="true"></i><span>Lembar Cetak</span></button>
+                    </div>
+                    <div class="pe-seg" role="group" aria-label="Orientasi halaman">
+                        <button type="button" data-orientation-btn="portrait" onclick="setOrientation('portrait')" class="pe-seg__btn" aria-pressed="true">
+                            <svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><rect x="1.5" y="1.5" width="11" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Portrait</span></button>
+                        <button type="button" data-orientation-btn="landscape" onclick="setOrientation('landscape')" class="pe-seg__btn" aria-pressed="false">
+                            <svg width="16" height="14" viewBox="0 0 16 14" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>Landscape</span></button>
+                    </div>
+                    <div class="pe-toolbar__spacer"></div>
+                    <button type="button" class="pe-btn" onclick="triggerFileInput()"><i class="fa-solid fa-image" aria-hidden="true"></i><span>Pilih foto</span></button>
+                    <span id="image-dimensions-badge" class="pe-badge" role="status" aria-live="polite">0 × 0 px</span>
+                </div>
+
+                <div id="editor-workspace" class="pe-stage no-print" aria-busy="false">
+                    <div id="drag-drop-zone" role="button" tabindex="0" aria-label="Unggah foto: klik, tekan Enter, atau seret file ke sini" onclick="triggerFileInput()" class="pe-drop">
+                        <i class="fa-solid fa-cloud-arrow-up pe-drop__icon" aria-hidden="true"></i>
+                        <h3>Upload Foto Anda</h3>
+                        <p>Klik untuk memilih gambar atau seret &amp; lepas di sini</p>
+                    </div>
+
+                    <div id="cropper-container" class="pe-cropper hidden">
+                        <img id="cropper-image" src="" alt="Foto yang sedang diedit">
+                    </div>
+
+                    <div id="fabric-container" class="pe-fabric hidden">
+                        <canvas id="fabric-canvas"></canvas>
+                    </div>
+
+                    <div id="editor-spinner" class="pe-spinner hidden" role="status">
+                        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                        <span id="editor-spinner-text">Memproses...</span>
+                    </div>
+                </div>
+
+                <div id="print-workspace" class="pe-stage pe-stage--print hidden">
+                    <div id="print-area"><div id="print-grid"></div></div>
+                </div>
+            </section>
+
+            <aside class="pe-side no-print" aria-label="Panel pengaturan">
+                <div class="pe-tabs" role="tablist" aria-label="Alat edit">
+                    <button type="button" role="tab" id="tab-crop" aria-controls="panel-crop" aria-selected="true" onclick="switchTab('crop')" class="tab-btn pe-tab"><i class="fa-solid fa-crop" aria-hidden="true"></i><span>Crop</span></button>
+                    <button type="button" role="tab" id="tab-adjust" aria-controls="panel-adjust" aria-selected="false" tabindex="-1" onclick="switchTab('adjust')" class="tab-btn pe-tab"><i class="fa-solid fa-sliders" aria-hidden="true"></i><span>Filter</span></button>
+                    <button type="button" role="tab" id="tab-text" aria-controls="panel-text" aria-selected="false" tabindex="-1" onclick="switchTab('text')" class="tab-btn pe-tab"><i class="fa-solid fa-font" aria-hidden="true"></i><span>Teks</span></button>
+                    <button type="button" role="tab" id="tab-download" aria-controls="panel-download" aria-selected="false" tabindex="-1" onclick="switchTab('download')" class="tab-btn pe-tab"><i class="fa-solid fa-download" aria-hidden="true"></i><span>Ekspor</span></button>
+                    <button type="button" role="tab" id="tab-print-setup" aria-controls="panel-print-setup" aria-selected="false" tabindex="-1" onclick="switchTab('print-setup')" class="tab-btn pe-tab"><i class="fa-solid fa-print" aria-hidden="true"></i><span>Cetak</span></button>
+                </div>
+
+                <div class="pe-panels">
+                    <div id="panel-crop" role="tabpanel" aria-labelledby="tab-crop" class="tab-panel pe-panel">
+                        <h2 class="pe-h">Potong &amp; Putar</h2>
+                        <div>
+                            <span class="pe-label" id="lbl-ratio">Rasio crop</span>
+                            <div class="pe-chips" role="group" aria-labelledby="lbl-ratio">
+                                <button type="button" data-ratio="free" onclick="setCropRatio(NaN)" class="ratio-btn pe-chip" aria-pressed="true">Free</button>
+                                <button type="button" data-ratio="1" onclick="setCropRatio(1)" class="ratio-btn pe-chip" aria-pressed="false">1 : 1</button>
+                                <button type="button" data-ratio="0.75" onclick="setCropRatio(3/4)" class="ratio-btn pe-chip" aria-pressed="false">3 : 4</button>
+                                <button type="button" data-ratio="1.3333" onclick="setCropRatio(4/3)" class="ratio-btn pe-chip" aria-pressed="false">4 : 3</button>
+                                <button type="button" data-ratio="1.7778" onclick="setCropRatio(16/9)" class="ratio-btn pe-chip" aria-pressed="false">16 : 9</button>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="pe-label" id="lbl-rotate">Putar foto</span>
+                            <div class="pe-chips" role="group" aria-labelledby="lbl-rotate">
+                                <button type="button" onclick="rotateImage(-90)" class="pe-chip"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> 90° kiri</button>
+                                <button type="button" onclick="rotateImage(90)" class="pe-chip"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> 90° kanan</button>
+                            </div>
+                        </div>
+                        <button type="button" onclick="applyCrop()" class="pe-btn pe-btn--primary pe-btn--block">Terapkan Potongan &amp; Buka Lembar Cetak</button>
+                    </div>
+
+                    <div id="panel-adjust" role="tabpanel" aria-labelledby="tab-adjust" class="tab-panel pe-panel hidden">
+                        <h2 class="pe-h">Filter</h2>
+                        <div class="pe-field">
+                            <label for="slider-brightness" class="pe-label pe-label--row"><span>Kecerahan</span><output id="val-brightness" for="slider-brightness">0%</output></label>
+                            <input type="range" id="slider-brightness" min="-100" max="100" value="0" oninput="updateFilter()" class="pe-range">
+                        </div>
+                        <div class="pe-field">
+                            <label for="slider-contrast" class="pe-label pe-label--row"><span>Kontras</span><output id="val-contrast" for="slider-contrast">0%</output></label>
+                            <input type="range" id="slider-contrast" min="-100" max="100" value="0" oninput="updateFilter()" class="pe-range">
+                        </div>
+                        <div class="pe-field">
+                            <label for="slider-saturate" class="pe-label pe-label--row"><span>Saturasi</span><output id="val-saturate" for="slider-saturate">0%</output></label>
+                            <input type="range" id="slider-saturate" min="-100" max="100" value="0" oninput="updateFilter()" class="pe-range">
+                        </div>
+                        <p class="pe-hint">Filter langsung dipakai pada pratinjau, cetak, dan ekspor tanpa menurunkan resolusi.</p>
+                        <div class="pe-row">
+                            <button type="button" onclick="applyFilterToImage()" class="pe-btn pe-btn--primary">Simpan Efek Filter</button>
+                            <button type="button" onclick="clearFilters()" class="pe-btn">Atur ulang</button>
+                        </div>
+                    </div>
+
+                    <div id="panel-text" role="tabpanel" aria-labelledby="tab-text" class="tab-panel pe-panel hidden">
+                        <h2 class="pe-h">Tambah Teks</h2>
+                        <div class="pe-field">
+                            <label for="text-input" class="pe-label">Teks</label>
+                            <input type="text" id="text-input" placeholder="Masukkan teks..." value="MorphPDF" class="pe-input">
+                        </div>
+                        <div class="pe-field">
+                            <label for="text-color" class="pe-label">Warna teks</label>
+                            <input type="color" id="text-color" value="#ffffff" class="pe-color">
+                        </div>
+                        <button type="button" onclick="addTextToCanvas()" class="pe-btn pe-btn--block">Tambah Teks ke Gambar</button>
+                        <div id="text-apply-actions" class="pe-row hidden">
+                            <button type="button" onclick="commitText()" class="pe-btn pe-btn--primary">Terapkan Teks</button>
+                            <button type="button" onclick="cancelText()" class="pe-btn">Batal</button>
+                        </div>
+                        <p class="pe-hint">Seret teks untuk memindahkannya, lalu tekan “Terapkan Teks”.</p>
+                    </div>
+
+                    <div id="panel-download" role="tabpanel" aria-labelledby="tab-download" class="tab-panel pe-panel hidden">
+                        <h2 class="pe-h">Ekspor Gambar</h2>
+                        <div class="pe-field">
+                            <label for="photo-filename-input" class="pe-label">Nama file</label>
+                            <input type="text" id="photo-filename-input" value="MorphPDF_Foto" placeholder="Isi nama file..." class="pe-input">
+                        </div>
+                        <div class="pe-field">
+                            <label for="photo-format-select" class="pe-label">Format</label>
+                            <select id="photo-format-select" class="pe-input">
+                                <option value="jpg">JPG / JPEG</option>
+                                <option value="png">PNG (Lossless)</option>
+                                <option value="webp">WEBP</option>
+                            </select>
+                        </div>
+                        <p class="pe-hint">Diekspor pada resolusi asli foto, sudah termasuk crop, filter, dan teks terbaru.</p>
+                        <button type="button" onclick="downloadEditedPhoto()" class="pe-btn pe-btn--primary pe-btn--block"><i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i><span>Unduh Gambar</span></button>
+                    </div>
+
+                    <div id="panel-print-setup" role="tabpanel" aria-labelledby="tab-print-setup" class="tab-panel pe-panel hidden">
+                        <h2 class="pe-h">Layout Cetak</h2>
+                        <div class="pe-field">
+                            <label for="print-photo-size" class="pe-label">Layout</label>
+                            <select id="print-photo-size" onchange="onPrintSettingsChanged()" class="pe-input">
+                                <option value="fit" selected>1 foto per halaman A4</option>
+                                <option value="3x4">3 x 4 cm (12 pasfoto)</option>
+                                <option value="4x6">4 x 6 cm (8 pasfoto)</option>
+                                <option value="2x3">2 x 3 cm (18 pasfoto)</option>
+                            </select>
+                        </div>
+                        <div class="pe-grid2">
+                            <div class="pe-field">
+                                <label for="print-orientation" class="pe-label">Orientasi</label>
+                                <select id="print-orientation" onchange="setOrientation(this.value)" class="pe-input">
+                                    <option value="portrait" selected>Portrait</option>
+                                    <option value="landscape">Landscape</option>
+                                </select>
+                            </div>
+                            <div class="pe-field" id="print-scale-field">
+                                <label for="print-scale-mode" class="pe-label">Skala</label>
+                                <select id="print-scale-mode" onchange="onPrintSettingsChanged()" class="pe-input">
+                                    <option value="fit" selected>Fit (foto utuh)</option>
+                                    <option value="fill">Fill (penuhi area)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pe-field">
+                            <label for="print-margin" class="pe-label">Margin (mm)</label>
+                            <input type="number" id="print-margin" min="0" max="20" step="1" value="5" oninput="onPrintSettingsChanged()" class="pe-input">
+                        </div>
+                        <div id="print-fill-options" class="pe-panel hidden">
+                            <div class="pe-field">
+                                <label for="print-focus-x" class="pe-label">Posisi foto: horizontal</label>
+                                <input type="range" id="print-focus-x" min="0" max="100" value="50" oninput="onFocusChanged()" class="pe-range">
+                            </div>
+                            <div class="pe-field">
+                                <label for="print-focus-y" class="pe-label">Posisi foto: vertikal</label>
+                                <input type="range" id="print-focus-y" min="0" max="100" value="50" oninput="onFocusChanged()" class="pe-range">
+                            </div>
+                            <button type="button" onclick="resetFocus()" class="pe-btn">Atur ulang posisi</button>
+                        </div>
+                        <p id="print-quality-note" class="pe-hint" role="status" aria-live="polite"></p>
+                        <button type="button" onclick="openPrintDialog()" class="pe-btn pe-btn--primary pe-btn--block"><i class="fa-solid fa-print" aria-hidden="true"></i><span>Cetak Sekarang</span></button>
+                    </div>
+
+                    <div class="pe-foot">
+                        <button type="button" onclick="resetToHomeScreen()" class="pe-link"><i class="fa-solid fa-image" aria-hidden="true"></i> Ganti Foto</button>
+                        <button type="button" onclick="resetImageOriginal()" class="pe-link pe-link--muted"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> Reset ke Asli</button>
+                    </div>
+                </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- VIEW 2: IMAGE CONVERTER -->
+        <div id="main-view-converter" class="hidden space-y-5">
+            <!-- Tool header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                    <span class="mp-tool-icon"><i class="fa-solid fa-file-arrow-down"></i></span>
+                    <div class="min-w-0">
+                        <div class="mp-crumb">
+                            <button onclick="switchMainView('home')"><i class="fa-solid fa-arrow-left"></i> Tools</button>
+                            <span class="mp-crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                            <span>Image Tools</span>
+                            <span class="mp-crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                            <span style="color:#302D28">Image Converter</span>
+                        </div>
+                        <h2 class="mp-workspace-title mt-1.5">Image Converter</h2>
+                        <p class="mp-workspace-desc">Ubah format &amp; kompresi gambar (PNG, JPG, WEBP, AVIF) — 100% client-side.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="resetConverterWorkspace()" class="mp-secondary-btn">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div id="converter-upload-card" class="mp-panel py-8 sm:py-12 px-4 text-center">
+                <div onclick="triggerConverterFileInput()" ondragover="handleConverterDragOver(event)" ondragleave="handleConverterDragLeave(event)" ondrop="handleConverterDrop(event)" class="mp-dropzone">
+                    <span class="mp-dropzone__icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                    <div>
+                        <h3>Upload Gambar Anda</h3>
+                        <p>Klik untuk memilih gambar atau seret &amp; lepas di sini</p>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                        <span class="mp-format-chip">PNG</span>
+                        <span class="mp-format-chip">JPG</span>
+                        <span class="mp-format-chip">WEBP</span>
+                        <span class="mp-format-chip">AVIF</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Converter Workspace Area -->
+            <div id="converter-workspace-area" class="hidden space-y-5">
+                <div class="mp-panel p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold" style="color:#777168">Ubah semua ke:</span>
+                            <select id="batch-output-format" onchange="updateBatchOutputFormat(this.value)" class="mp-select">
+                                <option value="WEBP">WEBP</option>
+                                <option value="JPG">JPG</option>
+                                <option value="JPEG">JPEG</option>
+                                <option value="PNG">PNG</option>
+                                <option value="AVIF">AVIF</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <span class="text-xs font-semibold shrink-0" style="color:#777168">Prefix nama file:</span>
+                            <input type="text" id="batch-filename-prefix" placeholder="Misal: Hasil_Foto" oninput="applyBatchFilenamePrefix(this.value)" class="mp-input-line w-40">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                        <button onclick="triggerConverterFileInput()" class="mp-secondary-btn">
+                            <i class="fa-solid fa-plus" style="color:#C98D50"></i> Tambah File
+                        </button>
+                        <button onclick="convertAllImages()" id="btn-convert-all" class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition">
+                            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                            <span id="btn-convert-all-text">Convert All Images</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Global Settings & Quality Slider -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mp-panel p-4">
+                        <div class="flex justify-between text-xs font-semibold mb-2" style="color:#777168">
+                            <span>KUALITAS OUTPUT</span>
+                            <span id="converter-quality-val" class="font-bold" style="color:#302D28">90%</span>
+                        </div>
+                        <input type="range" id="converter-quality-slider" min="10" max="100" value="90" oninput="updateConverterQuality(this.value)" class="w-full mp-range h-1.5 bg-gray-200 rounded-lg">
+                    </div>
+
+                    <div class="mp-panel p-4">
+                        <label class="text-xs font-semibold block mb-2" style="color:#777168">LATAR TRANSPARANSI (UNTUK JPG)</label>
+                        <select id="converter-bg-color" class="mp-select w-full">
+                            <option value="white">Putih (Default)</option>
+                            <option value="black">Hitam</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- File List Grid -->
+                <div id="converter-file-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: PDF TOOLS WORKSPACE -->
+        <div id="main-view-pdf" class="hidden space-y-5">
+            <!-- Tool header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                    <span class="mp-tool-icon"><i class="fa-solid fa-file-pdf"></i></span>
+                    <div class="min-w-0">
+                        <div class="mp-crumb">
+                            <button onclick="switchMainView('home')"><i class="fa-solid fa-arrow-left"></i> Tools</button>
+                            <span class="mp-crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                            <span>PDF Tools</span>
+                            <span class="mp-crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                            <span id="pdf-crumb-tool" style="color:#302D28">Image to PDF</span>
+                        </div>
+                        <h2 id="pdf-tool-title" class="mp-workspace-title mt-1.5">Image to PDF</h2>
+                        <p id="pdf-tool-description" class="mp-workspace-desc">Konversi gambar menjadi satu file PDF.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PDF Upload Card -->
+            <div id="pdf-upload-card" class="mp-panel py-8 sm:py-12 px-4 text-center">
+                <input type="file" id="pdf-file-input" accept="image/*" multiple class="hidden" onchange="handlePdfFilesSelected(event)">
+                <div onclick="triggerPdfFileInput()" class="mp-dropzone">
+                    <span class="mp-dropzone__icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                    <div>
+                        <h3>Upload File</h3>
+                        <p id="pdf-upload-hint" class="mt-1">Pilih satu atau beberapa file gambar dari perangkat Anda</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PDF Workspace Dynamic Options & Action Button -->
+            <div id="pdf-workspace-area" class="hidden space-y-5">
+                <!-- Config Options Panel -->
+                <div id="pdf-config-panel" class="mp-panel p-4 sm:p-5 space-y-4">
+                    <!-- Dynamic configs rendered here depending on tool -->
+                </div>
+
+                <!-- Preview Grid / File List -->
+                <div class="flex items-center justify-between">
+                    <p id="pdf-files-count-label" class="text-xs font-semibold" style="color:#777168"></p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="triggerPdfFileInput()" class="mp-secondary-btn">
+                            <i class="fa-solid fa-plus" style="color:#C98D50"></i> Tambah File
+                        </button>
+                        <button onclick="clearAllPdfFiles()" class="mp-secondary-btn">
+                            <i class="fa-solid fa-trash"></i> Hapus Semua
+                        </button>
+                    </div>
+                </div>
+                <div id="pdf-files-preview-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+                <!-- Process Action Button -->
+                <button id="btn-execute-pdf" onclick="executePdfTool()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gear"></i>
+                    <span id="btn-execute-pdf-text">Proses File Sekarang</span>
+                </button>
+
+                <!-- Real-time processing status (no fake progress %) -->
+                <div id="pdf-processing-status" class="hidden mp-panel p-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-circle-notch fa-spin" style="color:#C98D50"></i>
+                        <span id="pdf-processing-status-text" class="text-xs font-semibold" style="color:#3E3A34">Memproses...</span>
+                    </div>
+                </div>
+
+                <!-- Result panel: real output, real stats, real download links -->
+                <div id="pdf-results-panel" class="hidden space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: FILE TO EXCEL -->
+        <div id="main-view-excel" class="hidden space-y-5">
+            <!-- Tool header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                    <span class="mp-tool-icon"><i class="fa-solid fa-file-excel"></i></span>
+                    <div class="min-w-0">
+                        <div class="mp-crumb">
+                            <button onclick="switchMainView('home')"><i class="fa-solid fa-arrow-left"></i> Tools</button>
+                            <span class="mp-crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                            <span>Document Tools</span>
+                            <span class="mp-crumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+                            <span style="color:#302D28">File to Excel</span>
+                        </div>
+                        <h2 class="mp-workspace-title mt-1.5">File ke Excel</h2>
+                        <p class="mp-workspace-desc">Konversi CSV, JSON, XLS/XLSX, TXT, atau PDF menjadi file .xlsx yang sah — 100% client-side.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="resetExcelWorkspace()" class="mp-secondary-btn">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Card -->
+            <div id="excel-upload-card" class="mp-panel py-8 sm:py-12 px-4 text-center">
+                <input type="file" id="excel-file-input" accept=".csv,.json,.xls,.xlsx,.txt,.pdf" class="hidden" onchange="handleExcelFileSelected(event)">
+                <div onclick="triggerExcelFileInput()" ondragover="handleExcelDragOver(event)" ondragleave="handleExcelDragLeave(event)" ondrop="handleExcelDrop(event)" id="excel-drop-zone" class="mp-dropzone">
+                    <span class="mp-dropzone__icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                    <div>
+                        <h3>Drop file Anda di sini</h3>
+                        <p>atau klik untuk memilih file dari perangkat Anda</p>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                        <span class="mp-format-chip">CSV</span>
+                        <span class="mp-format-chip">JSON</span>
+                        <span class="mp-format-chip">XLS / XLSX</span>
+                        <span class="mp-format-chip">TXT</span>
+                        <span class="mp-format-chip">PDF</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspace: selected file + options -->
+            <div id="excel-workspace-area" class="hidden space-y-5">
+                <div id="excel-file-card" class="mp-panel p-4 flex items-center justify-between gap-4"></div>
+
+                <div id="excel-options-panel" class="mp-panel p-4 sm:p-5 space-y-3 hidden"></div>
+
+                <button id="btn-execute-excel" onclick="executeFileToExcel()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-export"></i>
+                    <span>Konversi ke Excel</span>
+                </button>
+
+                <div id="excel-processing-status" class="hidden mp-panel p-4">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-circle-notch fa-spin" style="color:#C98D50"></i>
+                        <span id="excel-processing-status-text" class="text-xs font-semibold" style="color:#3E3A34">Memproses...</span>
+                    </div>
+                </div>
+
+                <div id="excel-result-panel" class="hidden"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mp-footer no-print">
+        <div class="max-w-[1160px] mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-2.5">
+                <span class="mp-brand-mark" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 64 64">
+                        <defs><clipPath id="mp-mark-foot"><path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z"/></clipPath></defs>
+                        <path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z" fill="#302D28"/>
+                        <g clip-path="url(#mp-mark-foot)">
+                            <path d="M11.2 63.84 L60 23.2 L64 27.4 L64 68 L14 68 Z" fill="#E9B978"/>
+                            <path d="M8 60 L56 20" stroke="#F7F4ED" stroke-width="9"/>
+                            <path d="M22.1 51.6 L39.2 37.1" stroke="#302D28" stroke-width="4" stroke-linecap="round" fill="none"/>
+                            <path d="M46.2 30.5 L35.8 33 L38.4 35.4 L35 39.6 Z" fill="#302D28" stroke="#302D28" stroke-width="1.6" stroke-linejoin="round"/>
+                        </g>
+                        <rect x="14.5" y="13.5" width="19" height="3.8" rx="1.9" fill="#F7F4ED" opacity="0.5"/>
+                        <rect x="14.5" y="21.5" width="13" height="3.8" rx="1.9" fill="#F7F4ED" opacity="0.3"/>
+                    </svg>
+                </span>
+                <div>
+                    <span class="mp-brand-word block text-sm">MorphPDF</span>
+                    <span class="text-[11px]" style="color:#777168">Semua proses berjalan lokal di perangkat Anda.</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-5 text-xs">
+                <a href="#" class="whitespace-nowrap" onclick="switchMainView('home'); return false;">Tools</a>
+                <a href="#" class="whitespace-nowrap" onclick="switchMainView('photo'); return false;">Photo Editor</a>
+                <a href="#" class="whitespace-nowrap" onclick="switchMainView('converter'); return false;">Image Converter</a>
+                <a href="#" class="whitespace-nowrap" onclick="switchMainView('excel'); return false;">File ke Excel</a>
+            </div>
+            <p class="text-[11px]" style="color:#A9A196">&copy; <span id="footer-year">2025</span> MorphPDF</p>
+        </div>
+    </footer>
+
+    <!-- Dialog orientasi cetak -->
+    <div id="print-dialog" class="print-dialog no-print hidden" role="dialog" aria-modal="true" aria-labelledby="print-dialog-title" aria-describedby="print-dialog-desc">
+        <div class="print-dialog__backdrop" id="print-dialog-backdrop"></div>
+        <div class="print-dialog__panel">
+            <h2 id="print-dialog-title">Cetak foto</h2>
+            <p id="print-dialog-desc">Pilih orientasi kertas A4 untuk hasil cetak.</p>
+            <fieldset class="print-dialog__choices">
+                <legend class="sr-only">Orientasi halaman</legend>
+                <label class="orient-card">
+                    <input type="radio" name="print-dialog-orientation" value="portrait">
+                    <span class="orient-card__thumb" data-thumb="portrait" aria-hidden="true"></span>
+                    <span class="orient-card__title">Portrait</span>
+                    <span class="orient-card__sub">A4 tegak · 210 × 297 mm</span>
+                </label>
+                <label class="orient-card">
+                    <input type="radio" name="print-dialog-orientation" value="landscape">
+                    <span class="orient-card__thumb" data-thumb="landscape" aria-hidden="true"></span>
+                    <span class="orient-card__title">Landscape</span>
+                    <span class="orient-card__sub">A4 mendatar · 297 × 210 mm</span>
+                </label>
+            </fieldset>
+            <p id="print-dialog-info" class="pe-hint" role="status"></p>
+            <div class="print-dialog__actions">
+                <button type="button" id="print-dialog-cancel" class="pe-btn">Batal</button>
+                <button type="button" id="print-dialog-confirm" class="pe-btn pe-btn--primary">Lanjutkan Cetak</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lembar cetak sebenarnya (hanya tampil saat mencetak) -->
+    <div id="print-root" aria-hidden="true"></div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Main application logic -->
+    <script src="assets/script.js"></script>
+    <script src="assets/pdf-tools.js"></script>
+    <script src="assets/excel-tools.js"></script>
+    <script src="assets/app.js"></script>
+    <script src="assets/pwa.js"></script>
+</body>
+</html>

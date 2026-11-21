@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160" role="img" aria-label="MorphPDF — Image, PDF and document tools">
+  <!-- MorphPDF primary logo: symbol + wordmark lockup.
+       Wordmark uses Inter (fallback: Manrope / system sans). -->
+  <defs>
+    <clipPath id="mp-sheet-lockup">
+      <path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z"/>
+    </clipPath>
+  </defs>
+  <g transform="translate(48 48)">
+    <path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z" fill="#302D28"/>
+    <g clip-path="url(#mp-sheet-lockup)">
+      <path d="M11.2 63.84 L60 23.2 L64 27.4 L64 68 L14 68 Z" fill="#E9B978"/>
+      <path d="M8 60 L56 20" stroke="#F7F4ED" stroke-width="7"/>
+      <path d="M17 51 L33 37.4" stroke="#F7F4ED" stroke-width="4.6" stroke-linecap="round" fill="none"/>
+      <path d="M42.5 30.6 L31.4 33.4 L34.2 36 L30.6 40.4 Z" fill="#F7F4ED" stroke="#F7F4ED" stroke-width="2" stroke-linejoin="round"/>
+    </g>
+    <rect x="14.5" y="13.5" width="19" height="3.8" rx="1.9" fill="#F7F4ED" opacity="0.5"/>
+    <rect x="14.5" y="21.5" width="13" height="3.8" rx="1.9" fill="#F7F4ED" opacity="0.3"/>
+  </g>
+  <text x="172" y="82" font-family="Inter, Manrope, system-ui, sans-serif" font-weight="700" font-size="56" letter-spacing="-1.2" fill="#302D28">Morph<tspan fill="#C98D50">PDF</tspan></text>
+  <text x="174" y="118" font-family="Inter, Manrope, system-ui, sans-serif" font-weight="500" font-size="17" letter-spacing="3.2" fill="#777168">IMAGE · PDF · DOCUMENT TOOLS</text>
+</svg>

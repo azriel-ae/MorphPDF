@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MorphPDF">
+  <defs>
+    <clipPath id="mp-sheet"><path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z"/></clipPath>
+  </defs>
+  <path d="M16 4 H40 L56 20 V52 A8 8 0 0 1 48 60 H16 A8 8 0 0 1 8 52 V12 A8 8 0 0 1 16 4 Z" fill="#302D28"/>
+  <g clip-path="url(#mp-sheet)">
+    <path d="M4.88 68.46 L66.88 16.79 L124.5 85.93 L62.5 137.6 Z" fill="#E9B978"/>
+    <path d="M8.0 60.0 L56.0 20.0" stroke="#F7F4ED" stroke-width="9.0"/>
+    <path d="M18.56 51.2 L32 40" stroke="#302D28" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M36.8 36 L30.72 46.27 L25.6 40.13 Z" fill="#302D28" stroke="#302D28" stroke-width="1.6" stroke-linejoin="round"/>
+  </g>
+  <rect x="14.5" y="13.5" width="19" height="3.8" rx="1.9" fill="#302D28" opacity="0.5"/>
+  <rect x="14.5" y="21.5" width="13" height="3.8" rx="1.9" fill="#302D28" opacity="0.3"/>
+</svg>
