@@ -109,4 +109,4 @@ Arah visual: **Warm Liquid Glass + Soft Apricot**, editorial dan tenang.
   tool; kartu tools putih dengan ikon tile peach/apricot per kategori.
 - **CTA primer**: solid amber `#C98D50` dengan teks cokelat tua `#2F2213`.
 - Palet Tailwind diremap lewat `assets/config.js`, sehingga seluruh markup
-  dinamis (daftar file, hasil konversi, toast) mengikuti design system 
+  dinamis (daftar file, hasil konversi, toast) mengikuti design 
